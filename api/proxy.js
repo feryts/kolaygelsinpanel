@@ -1,3 +1,11 @@
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -22,22 +30,13 @@ export default async function handler(req, res) {
   if (!targetUrl) return res.status(400).json({ error: 'Gecersiz endpoint: ' + endpoint });
 
   try {
-    // Body'yi raw olarak oku
-    const rawBody = await new Promise((resolve) => {
-      let data = '';
-      req.on('data', chunk => { data += chunk; });
-      req.on('end', () => resolve(data));
-    });
-
-    let parsedBody = {};
-    try { parsedBody = JSON.parse(rawBody); } catch(e) {}
-
+    const b = req.body || {};
     let body, headers;
 
     if (endpoint === 'login') {
       const params = new URLSearchParams();
-      params.append('userName', parsedBody.userName || '');
-      params.append('password', parsedBody.password || '');
+      params.append('userName', b.userName || '');
+      params.append('password', b.password || '');
       params.append('grant_type', 'password');
       params.append('channel', '1');
       params.append('CustomerType', 'null');
@@ -51,7 +50,7 @@ export default async function handler(req, res) {
         'Referer': 'https://kurumsal.kolaygelsin.com/',
       };
     } else {
-      body = rawBody || '{}';
+      body = JSON.stringify(b);
       headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -72,7 +71,7 @@ export default async function handler(req, res) {
     try {
       data = JSON.parse(text);
     } catch(e) {
-      return res.status(200).json({ success: true, raw: text.substring(0, 100) });
+      return res.status(200).json({ error: 'API JSON donmedi', raw: text.substring(0, 200) });
     }
 
     return res.status(fetchRes.status).json(data);
