@@ -1,12 +1,4 @@
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
-  },
-};
-
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -61,8 +53,8 @@ export default async function handler(req, res) {
     }
 
     const fetchRes = await fetch(targetUrl, { method: 'POST', headers, body });
-
     const text = await fetchRes.text();
+
     if (!text || text.trim() === '') {
       return res.status(200).json({ success: true });
     }
@@ -71,7 +63,7 @@ export default async function handler(req, res) {
     try {
       data = JSON.parse(text);
     } catch(e) {
-      return res.status(200).json({ error: 'API JSON donmedi', raw: text.substring(0, 200) });
+      return res.status(200).json({ error: 'JSON parse hatasi', raw: text.substring(0, 300) });
     }
 
     return res.status(fetchRes.status).json(data);
