@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     getshipmentevents:   'https://api.kolaygelsin.com/api/request/GetShipmentEvents',
     getlabel:            'https://api.kolaygelsin.com/api/request/GETSHIPMENTITEMLABELWITHPRINTTYPE',
     gettickets:          'https://api.kolaygelsin.com/api/request/getTicketRequests',
+    logout:              'https://api.kolaygelsin.com/api/request/LOGOUT',
   };
 
   const targetUrl = urlMap[endpoint];
@@ -24,8 +25,7 @@ export default async function handler(req, res) {
     let body, headers;
 
     if (endpoint === 'login') {
-      // Form encoded
-      const b = req.body;
+      const b = req.body || {};
       const params = new URLSearchParams();
       params.append('userName', b.userName || '');
       params.append('password', b.password || '');
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
         'Referer': 'https://kurumsal.kolaygelsin.com/',
       };
     } else {
-      body = JSON.stringify(req.body);
+      body = req.body ? JSON.stringify(req.body) : '{}';
       headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -53,11 +53,18 @@ export default async function handler(req, res) {
     }
 
     const fetchRes = await fetch(targetUrl, { method: 'POST', headers, body });
+    
     const text = await fetchRes.text();
+    if (!text || text.trim() === '') {
+      return res.status(200).json({ success: true });
+    }
 
     let data;
-    try { data = JSON.parse(text); }
-    catch(e) { return res.status(500).json({ error: 'API JSON donmedi', raw: text.substring(0, 200) }); }
+    try {
+      data = JSON.parse(text);
+    } catch(e) {
+      return res.status(200).json({ success: true, raw: text.substring(0, 100) });
+    }
 
     return res.status(fetchRes.status).json(data);
   } catch (err) {
