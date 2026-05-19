@@ -22,13 +22,22 @@ export default async function handler(req, res) {
   if (!targetUrl) return res.status(400).json({ error: 'Gecersiz endpoint: ' + endpoint });
 
   try {
+    // Body'yi raw olarak oku
+    const rawBody = await new Promise((resolve) => {
+      let data = '';
+      req.on('data', chunk => { data += chunk; });
+      req.on('end', () => resolve(data));
+    });
+
+    let parsedBody = {};
+    try { parsedBody = JSON.parse(rawBody); } catch(e) {}
+
     let body, headers;
 
     if (endpoint === 'login') {
-      const b = req.body || {};
       const params = new URLSearchParams();
-      params.append('userName', b.userName || '');
-      params.append('password', b.password || '');
+      params.append('userName', parsedBody.userName || '');
+      params.append('password', parsedBody.password || '');
       params.append('grant_type', 'password');
       params.append('channel', '1');
       params.append('CustomerType', 'null');
@@ -42,7 +51,7 @@ export default async function handler(req, res) {
         'Referer': 'https://kurumsal.kolaygelsin.com/',
       };
     } else {
-      body = req.body ? JSON.stringify(req.body) : '{}';
+      body = rawBody || '{}';
       headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -53,7 +62,7 @@ export default async function handler(req, res) {
     }
 
     const fetchRes = await fetch(targetUrl, { method: 'POST', headers, body });
-    
+
     const text = await fetchRes.text();
     if (!text || text.trim() === '') {
       return res.status(200).json({ success: true });
