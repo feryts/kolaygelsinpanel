@@ -153,6 +153,10 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .tarama-kapat{background:none;border:none;color:var(--text2);cursor:pointer;font-size:22px;line-height:1;padding:0}
 .tarama-video{width:100%;border-radius:10px;background:#000;max-height:320px;object-fit:cover;display:block}
 .tarama-hint{font-size:11px;color:var(--text2);text-align:center;margin-top:8px}
+.tarama-altrow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.tarama-altrow .tarama-hint{margin-top:0;flex:1}
+.fener-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;background:var(--btn-bg);border:1.5px solid var(--border);border-radius:10px;padding:7px 10px;color:var(--text2);font-size:11px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s}
+.fener-btn.aktif{background:var(--accent);color:#fff;border-color:var(--accent)}
 .tarama-err{display:none;color:var(--err-text);font-size:12px;text-align:center;margin-top:8px;background:var(--err-bg);border:1px solid var(--err-border);border-radius:8px;padding:8px}
 
 .bilgi-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;padding:20px}
@@ -223,7 +227,13 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
         <button class="tarama-kapat" onclick="taramaDurdur()">×</button>
       </div>
       <video id="taramaVideo" class="tarama-video"></video>
-      <div class="tarama-hint">Kamerayı barkod veya QR koduna doğrultun</div>
+      <div class="tarama-altrow">
+        <button class="fener-btn" id="fenerBtn" onclick="fenerDegistir()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+          Fener
+        </button>
+        <div class="tarama-hint">Kamerayı barkod veya QR koduna doğrultun</div>
+      </div>
       <div class="tarama-err" id="taramaHata"></div>
     </div>
   </div>
@@ -239,7 +249,11 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
       </div>
       <div class="bilgi-item">
         <div class="bilgi-ad">📷 Tara</div>
-        <div class="bilgi-aciklama">Kamerayı açar, barkod veya QR kodunu okuduğu an numarayı kutuya yazar, panoya kopyalar ve otomatik sorgular — SORGULA butonuna basmana gerek yok.</div>
+        <div class="bilgi-aciklama">Kamerayı açar, barkod veya QR kodunu okuduğu an bip sesi çalar, numarayı kutuya yazar, panoya kopyalar ve otomatik sorgular — SORGULA butonuna basmana gerek yok.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🔦 Fener</div>
+        <div class="bilgi-aciklama">Tarama ekranında karanlıkta barkod okutmayı kolaylaştırmak için kameranın fenerini açıp kapatır (desteklemeyen cihazlarda görünmez).</div>
       </div>
       <div class="bilgi-item">
         <div class="bilgi-ad">☎️ Son 4 (otomatik)</div>
@@ -415,6 +429,40 @@ async function yapistir(){
 }
 
 let taramaOkuyucu=null;
+let fenerAcik=false;
+
+function bipSesi(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.type="sine";
+    osc.frequency.value=880;
+    gain.gain.setValueAtTime(.2,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.15);
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.start();osc.stop(ctx.currentTime+.15);
+  }catch(e){}
+}
+
+async function fenerDegistir(){
+  const video=document.getElementById("taramaVideo");
+  const stream=video.srcObject;
+  const track=stream&&stream.getVideoTracks()[0];
+  if(!track)return;
+  const yetenekler=track.getCapabilities?track.getCapabilities():{};
+  if(!yetenekler.torch){
+    const hataEl=document.getElementById("taramaHata");
+    hataEl.textContent="Bu cihaz/tarayıcı fener kontrolünü desteklemiyor.";
+    hataEl.style.display="block";
+    return;
+  }
+  try{
+    await track.applyConstraints({advanced:[{torch:!fenerAcik}]});
+    fenerAcik=!fenerAcik;
+    document.getElementById("fenerBtn").classList.toggle("aktif",fenerAcik);
+  }catch(e){}
+}
 
 async function taramaBaslat(){
   const modal=document.getElementById("taramaModal");
@@ -429,6 +477,7 @@ async function taramaBaslat(){
     taramaOkuyucu.decodeFromVideoDevice(arkaKamera.deviceId,"taramaVideo",(sonuc,hata)=>{
       if(sonuc){
         const metin=sonuc.getText().trim().replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
+        bipSesi();
         taramaDurdur();
         if(metin){
           document.getElementById("no").value=metin;
@@ -446,6 +495,8 @@ async function taramaBaslat(){
 
 function taramaDurdur(){
   if(taramaOkuyucu){taramaOkuyucu.reset();taramaOkuyucu=null;}
+  fenerAcik=false;
+  document.getElementById("fenerBtn").classList.remove("aktif");
   document.getElementById("taramaModal").classList.remove("show");
 }
 
