@@ -26,7 +26,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
 .bg-logo{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90vw;max-width:500px;opacity:var(--logo-op);pointer-events:none;z-index:0}
 
-.tbar{position:fixed;top:16px;right:16px;z-index:100}
+.tbar{position:fixed;top:16px;right:16px;z-index:100;display:flex;align-items:center;gap:8px}
 .tpicker{position:relative}
 .tacik{width:38px;height:38px;border-radius:50%;border:2px solid var(--accent);background:var(--btn-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 12px var(--shadow)}
 .tacik:active{transform:scale(.9)}
@@ -145,16 +145,6 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .err{display:none;background:var(--err-bg);border:1px solid var(--err-border);border-radius:12px;padding:12px 16px;color:var(--err-text);font-size:13px;text-align:center}
 .err.show{display:block}
 
-.orow{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:2px 4px}
-.olabel{font-size:11px;color:var(--text2);font-weight:600;letter-spacing:.3px;font-family:'Outfit',sans-serif}
-.oswitch{position:relative;width:40px;height:22px;flex-shrink:0}
-.oswitch input{opacity:0;width:0;height:0;position:absolute}
-.oslider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:22px;transition:.2s}
-.oslider:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-.oswitch input:checked+.oslider{background:var(--accent)}
-.oswitch input:checked+.oslider:before{transform:translateX(18px)}
-.osec{background:var(--btn-bg);border:1.5px solid var(--border);border-radius:8px;color:var(--accent);font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;padding:4px 6px}
-
 .tarama-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;padding:20px}
 .tarama-modal.show{display:flex}
 .tarama-box{background:var(--card);border-radius:18px;padding:16px;width:100%;max-width:380px;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow)}
@@ -164,12 +154,26 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .tarama-video{width:100%;border-radius:10px;background:#000;max-height:320px;object-fit:cover;display:block}
 .tarama-hint{font-size:11px;color:var(--text2);text-align:center;margin-top:8px}
 .tarama-err{display:none;color:var(--err-text);font-size:12px;text-align:center;margin-top:8px;background:var(--err-bg);border:1px solid var(--err-border);border-radius:8px;padding:8px}
+
+.bilgi-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;padding:20px}
+.bilgi-modal.show{display:flex}
+.bilgi-box{background:var(--card);border-radius:18px;padding:16px;width:100%;max-width:400px;max-height:82vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow)}
+.bilgi-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:sticky;top:0;background:var(--card)}
+.bilgi-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-family:'DM Mono',monospace}
+.bilgi-kapat{background:none;border:none;color:var(--text2);cursor:pointer;font-size:22px;line-height:1;padding:0}
+.bilgi-item{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.bilgi-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.bilgi-ad{font-size:13px;font-weight:700;color:var(--text);font-family:'Outfit',sans-serif;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.bilgi-aciklama{font-size:12px;color:var(--text2);line-height:1.5}
 </style>
 </head>
 <body>
 <img class="bg-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Kolay_Gelsin_logo.png/800px-Kolay_Gelsin_logo.png" alt="" onerror="this.style.display='none'">
 
 <div class="tbar">
+  <button class="tacik" onclick="bilgiAc()" title="Nasıl çalışır?">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+  </button>
   <div class="tpicker" id="tpicker">
     <button class="tacik" onclick="tdrop()">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
@@ -204,22 +208,6 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
         Tara
       </button>
     </div>
-    <div class="orow">
-      <span class="olabel">Otomatik Ara</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <select id="otoSure" class="osec">
-          <option value="1">1 sn</option>
-          <option value="2">2 sn</option>
-          <option value="3">3 sn</option>
-          <option value="4">4 sn</option>
-          <option value="5">5 sn</option>
-        </select>
-        <label class="oswitch">
-          <input type="checkbox" id="otoAra">
-          <span class="oslider"></span>
-        </label>
-      </div>
-    </div>
     <div class="brow">
       <button class="sbtn" id="sbtn" onclick="sorgula()">SORGULA</button>
       <button class="gbtn" onclick="gtoggle()">
@@ -237,6 +225,42 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
       <video id="taramaVideo" class="tarama-video"></video>
       <div class="tarama-hint">Kamerayı barkod veya QR koduna doğrultun</div>
       <div class="tarama-err" id="taramaHata"></div>
+    </div>
+  </div>
+  <div class="bilgi-modal" id="bilgiModal">
+    <div class="bilgi-box">
+      <div class="bilgi-hdr">
+        <span class="bilgi-title">Nasıl Çalışır?</span>
+        <button class="bilgi-kapat" onclick="bilgiKapat()">×</button>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">📋 Yapıştır</div>
+        <div class="bilgi-aciklama">Panodaki numarayı kutuya yapıştırır ve otomatik sorgular.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">📷 Tara</div>
+        <div class="bilgi-aciklama">Kamerayı açar, barkod veya QR kodunu okuduğu an numarayı kutuya yazar, panoya kopyalar ve otomatik sorgular — SORGULA butonuna basmana gerek yok.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">☎️ Son 4 (otomatik)</div>
+        <div class="bilgi-aciklama">Tara ile yapılan sorgu sonuçlanınca, alıcının telefon numarasının son 4 hanesi otomatik olarak panoya kopyalanır. Elle SON 4 butonuna basmana gerek kalmaz.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🕓 Geçmiş</div>
+        <div class="bilgi-aciklama">Son yapılan sorgular listelenir ve 3 saat boyunca saklanır, sonra otomatik silinir.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🏷️ Etiket Göster</div>
+        <div class="bilgi-aciklama">Sorgulanan gönderinin kargo etiketini görüntüler ve indirmeni sağlar.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🎨 Tema</div>
+        <div class="bilgi-aciklama">Sağ üstteki renk simgesinden 6 farklı görünüm arasında seçim yapabilirsin, tercihin hatırlanır.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">📞 Ara</div>
+        <div class="bilgi-aciklama">Telefonun arama uygulamasını numara dolu şekilde açar; son adım olarak arama tuşuna basman gerekir (tarayıcılar güvenlik nedeniyle direkt aramayı engeller).</div>
+      </div>
     </div>
   </div>
   <div class="gpanel" id="gpanel">
@@ -371,21 +395,7 @@ setInterval(gsayac,1000);gsayac();
 
 document.getElementById("no").addEventListener("keydown",e=>{if(e.key==="Enter")sorgula();});
 
-let otoAraTimer=null;
 let otoKopyalaBekliyor=false;
-const otoAraKutu=document.getElementById("otoAra");
-const otoSureKutu=document.getElementById("otoSure");
-otoAraKutu.checked=localStorage.getItem("otoAra")==="1";
-otoSureKutu.value=localStorage.getItem("otoSure")||"5";
-otoSureKutu.addEventListener("change",function(){localStorage.setItem("otoSure",this.value);});
-otoAraKutu.addEventListener("change",function(){
-  localStorage.setItem("otoAra",this.checked?"1":"0");
-  if(otoAraTimer){clearTimeout(otoAraTimer);otoAraTimer=null;}
-  if(this.checked){
-    const v=document.getElementById("no").value.trim();
-    if(v.length>=6){otoKopyalaBekliyor=true;sorgula();}
-  }
-});
 
 document.getElementById("no").addEventListener("input",function(){
   if(!this.value){
@@ -393,14 +403,6 @@ document.getElementById("no").addEventListener("input",function(){
     document.getElementById("wrap").classList.remove("compact");
     document.getElementById("result").classList.remove("show");
     document.getElementById("err").classList.remove("show");
-  }
-  if(otoAraTimer){clearTimeout(otoAraTimer);otoAraTimer=null;}
-  if(otoAraKutu.checked){
-    const v=this.value.trim();
-    if(v.length>=6){
-      const bekleme=parseInt(otoSureKutu.value||"5",10)*1000;
-      otoAraTimer=setTimeout(()=>{otoKopyalaBekliyor=true;sorgula();},bekleme);
-    }
   }
 });
 
@@ -452,6 +454,9 @@ function taramaKopyala(metin){
     navigator.clipboard.writeText(metin).catch(()=>{});
   }
 }
+
+function bilgiAc(){document.getElementById("bilgiModal").classList.add("show");}
+function bilgiKapat(){document.getElementById("bilgiModal").classList.remove("show");}
 
 function kopyala(){
   const tel=document.getElementById("pnum").textContent;
